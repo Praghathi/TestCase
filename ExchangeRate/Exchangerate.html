@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="//code.jquery.com/jquery-1.12.3.js"></script>
+    <script src="//code.jquery.com/jquery-1.12.3.js"></script>
+    <title>Exchange rate conversion</title>
+    <style>
+        select {
+            
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f1f1f1;
+        }
+        td {
+            padding: 15px;
+            text-align: left;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        body {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 16px;
+        }
+        legend {
+            display: block;
+            padding-left: 2px;
+            padding-right: 2px;
+            border: none;
+        }
+
+        fieldset {
+            border: 5px solid #1F497D;
+            /*background: #ddd;*/
+            border-radius: 4px;
+            padding: 15px;
+            display: inline-block;
+        }
+
+            fieldset legend {
+                background: #1F497D;
+                color: #fff;
+                padding: 5px 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                box-shadow: 0 0 0 5px #ddd;
+                margin-left: 20px;
+            }
+
+        body.waiting * {
+            opacity: 0.6 !important;
+            cursor: progress !important;
+        }
+
+        .button {
+            background-color: #1F497D;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px 2px;
+            /*cursor: pointer;*/
+        
+        }
+
+            .button:hover {
+                box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+            }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+          
+        .grfieldset {
+            border: 5px solid #4CAF50;
+            /*background: #ddd;*/
+            border-radius: 4px;
+            padding: 15px;
+            display: inline-block;
+        }
+
+        .grlegend {
+            background: #4CAF50;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 5px;
+            box-shadow: 0 0 0 5px #ddd;
+            margin-left: 20px;
+        }
+    </style>
+
+    <script type="text/javascript">
+ 
+       
+
+        $(document).ready(function () {
+
+            $(document).ajaxStart(function () {
+                $(document.body).css({ 'cursor': 'wait' })
+            });
+            $(document).ajaxComplete(function () {
+                $(document.body).css({ 'cursor': 'default' })
+            });
+
+            $("#divresult").hide();
+            $('#btnSubmit').click(function () {
+
+               //$('body').addclass('waiting');
+
+                var basecur = $('#ltBaseCurrency').val();
+                var tgtcur = $('#ltTgtCurrency').val();
+                var startDate = $('#dtStart').val();
+                var endDate = $('#dtEnd').val();
+                //alert(basecur + ' ' + tgtcur + ' ' + startDate + '' + endDate);
+
+                if (basecur == tgtcur)
+                    alert(" Please choose a different base/target currency");
+
+                else if (startDate == "" || endDate == "")
+                    alert(" Please choose a date");
+
+                else if (startDate > endDate)
+                    alert(" Start date must be earlier than end date ");
+                else
+                {
+                    $("#btnSubmit").css({ 'cursor': 'wait' });
+                     $.ajax({
+                        type: 'GET',
+                        url: 'api/Values?startDate=' + startDate + '&endDate=' + endDate + '&baseCurrency=' + basecur + '&targetCurrency=' + tgtcur,
+                        dataType: 'json',
+                        success: function (data) {
+
+                        $("#divresult").hide();
+
+                            if (data == "No data") {
+                                $("#btnSubmit").css({ 'cursor': 'default' });
+                                alert("Sorry, No data found for your current choice.");
+                            }
+                        else
+                        {
+                            
+                            data = JSON.parse(data);
+                            var str = 'A min rate of <b>' + data.minRate + '</b> on ' + data.minDate;
+                            $('#firstrow').html(str);
+                            str = 'A max rate of <b>' + data.maxRate + '</b> on ' + data.maxDate;
+                            $('#secondrow').html(str);
+                            str = 'An average rate of <b>' + data.avgRate + '</b>';
+                            $('#thirdrow').html(str);
+                            $('#legendlabel').html($('#ltBaseCurrency').val() + ' -> ' + $('#ltTgtCurrency').val() + '  |  ' + startDate + ' -- ' + endDate + ' ');
+                            $("#divresult").show();
+                            $("#btnSubmit").css({ 'cursor': 'default' });
+
+                        }                       
+                        
+                    }
+                    });
+                    
+                }
+                
+                
+            });
+
+        });     
+    </script>
+</head>
+<body>
+    <div align="center">
+        <form >
+            <fieldset>
+                <legend align="left"> Exchange rate analysis</legend>
+                <table id="main table">
+                    <tr>
+                        <td> <label>Select base currency list  </label></td>
+                        <td>
+                            <select id="ltBaseCurrency" required>
+                                <option value="AUD">AUD</option>
+                                <option value="BGN">BGN</option>
+                                <option value="BRL">BRL</option>
+                                <option value="CAD">CAD</option>
+                                <option value="CHF">CHF</option>
+                                <option value="CNY">CNY</option>
+                                <option value="CZK">CZK</option>
+                                <option value="DKK">DKK</option>
+                                <option value="EEK">EEK</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="HKD">HKD</option>
+                                <option value="HRK">HRK</option>
+                                <option value="HUF">HUF</option>
+                                <option value="IDR">IDR</option>
+                                <option value="INR">INR</option>
+                                <option value="JPY">JPY</option>
+                                <option value="KRW">KRW</option>
+                                <option value="LVL">LVL</option>
+                                <option value="LTL">LTL</option>
+                                <option value="MXN">MXN</option>
+                                <option value="MYR">MYR</option>
+                                <option value="NOK">NOK</option>
+                                <option value="NZD">NZD</option>
+                                <option value="PHP">PHP</option>
+                                <option value="PLN">PLN</option>
+                                <option value="RON">RON</option>
+                                <option value="RUB">RUB</option>
+                                <option value="SEK">SEK</option>
+                                <option value="SGD">SGD</option>
+                                <option value="THB">THB</option>
+                                <option value="TRY">TRY</option>
+                                <option value="USD">USD</option>
+                                <option value="ZAR">ZAR</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td> <label>Select target currency list</label> </td>
+                        <td>
+                            <select id="ltTgtCurrency" required>
+                                <option value="AUD">AUD</option>
+                                <option value="BGN">BGN</option>
+                                <option value="BRL">BRL</option>
+                                <option value="CAD">CAD</option>
+                                <option value="CHF">CHF</option>
+                                <option value="CNY">CNY</option>
+                                <option value="CZK">CZK</option>
+                                <option value="DKK">DKK</option>
+                                <option value="EEK">EEK</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="HKD">HKD</option>
+                                <option value="HRK">HRK</option>
+                                <option value="HUF">HUF</option>
+                                <option value="IDR">IDR</option>
+                                <option value="INR">INR</option>
+                                <option value="JPY">JPY</option>
+                                <option value="KRW">KRW</option>
+                                <option value="LVL">LVL</option>
+                                <option value="LTL">LTL</option>
+                                <option value="MXN">MXN</option>
+                                <option value="MYR">MYR</option>
+                                <option value="NOK">NOK</option>
+                                <option value="NZD">NZD</option>
+                                <option value="PHP">PHP</option>
+                                <option value="PLN">PLN</option>
+                                <option value="RON">RON</option>
+                                <option value="RUB">RUB</option>
+                                <option value="SEK">SEK</option>
+                                <option value="SGD">SGD</option>
+                                <option value="THB">THB</option>
+                                <option value="TRY">TRY</option>
+                                <option value="USD">USD</option>
+                                <option value="ZAR">ZAR</option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td> <label>Enter the start date </label></td>
+                        <td> <input type="date" id="dtStart" name="dtStart" required /> </td>
+                    </tr>
+
+                    <tr>
+                        <td> <label> Enter the end date </label></td>
+                        <td> <input type="date" id="dtEnd" name="dtEnd" required /> </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type="button" class="button" id="btnSubmit" name="btnSubmit" value="Submit"> </td>
+                    </tr>
+                </table>
+                </fieldset>
+        </form>
+
+        <br />
+        <br />
+        <br />
+     
+
+            <div id="divresult">
+                <form>
+                    <fieldset class="grfieldset">
+                        <legend class="grlegend" align="left"> <label id="legendlabel"></label> </legend>
+                        <table id="result">
+                            <tr>
+                                <td> <label id="firstrow"> </label></td>
+                            </tr>
+                            <tr>
+                                <td> <label id="secondrow"></label></td>
+                            </tr>
+                            <tr>
+                                <td> <label id="thirdrow"></label></td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </form>
+            </div>
+        
+</body>
+</html>
